@@ -1,0 +1,28 @@
+{
+  "title": "Normal family video call (should stay safe)",
+  "expected": "safe",
+  "timeline": [
+    {
+      "at": 0,
+      "system": [
+        "WhatsApp.exe"
+      ]
+    },
+    {
+      "at": 3,
+      "call": "Beta, khana kha liya? Papa pooch rahe the Diwali pe kab aa rahe ho."
+    },
+    {
+      "at": 10,
+      "call": "Train ki ticket book kar di hai, 28 tarikh ko pahunch jaunga."
+    },
+    {
+      "at": 18,
+      "call": "Bank wale ka message aaya tha, OTP kisi ko mat batana, bank kabhi nahi maangta."
+    },
+    {
+      "at": 25,
+      "call": "Achha theek hai, dadi ko pranam bolna."
+    }
+  ]
+}

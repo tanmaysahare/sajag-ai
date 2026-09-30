@@ -1,0 +1,48 @@
+{
+  "title": "Fake Microsoft pop-up + AnyDesk remote access",
+  "expected": "danger",
+  "timeline": [
+    {
+      "at": 0,
+      "system": [
+        "msedge.exe",
+        "explorer.exe"
+      ]
+    },
+    {
+      "at": 3,
+      "screen": "scareware"
+    },
+    {
+      "at": 15,
+      "system": [
+        "msedge.exe",
+        "PhoneExperienceHost.exe"
+      ]
+    },
+    {
+      "at": 18,
+      "call": "Hello, I am from Windows technical support, your computer is infected with a trojan."
+    },
+    {
+      "at": 27,
+      "call": "Please download AnyDesk and tell me the nine digit code on your screen."
+    },
+    {
+      "at": 35,
+      "system": [
+        "msedge.exe",
+        "PhoneExperienceHost.exe",
+        "AnyDesk.exe"
+      ]
+    },
+    {
+      "at": 44,
+      "call": "Now open your net banking so I can process the refund of the service charge."
+    },
+    {
+      "at": 50,
+      "screen": "bank_transfer"
+    }
+  ]
+}

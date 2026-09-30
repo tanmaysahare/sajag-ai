@@ -1,0 +1,31 @@
+{
+  "title": "Office IT fixing a laptop over TeamViewer (legit, low risk)",
+  "expected": "caution",
+  "timeline": [
+    {
+      "at": 0,
+      "system": [
+        "Teams.exe"
+      ]
+    },
+    {
+      "at": 4,
+      "call": "Hi, this is Ravi from the IT helpdesk about your ticket for the VPN issue."
+    },
+    {
+      "at": 12,
+      "call": "I will connect through TeamViewer from the company portal to update the VPN client."
+    },
+    {
+      "at": 18,
+      "system": [
+        "Teams.exe",
+        "TeamViewer.exe"
+      ]
+    },
+    {
+      "at": 26,
+      "call": "Done, please restart once and let me know if the VPN connects."
+    }
+  ]
+}

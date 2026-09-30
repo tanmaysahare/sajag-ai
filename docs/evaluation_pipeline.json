@@ -1,0 +1,63 @@
+{
+  "segment_level": {
+    "threshold": 0.35,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "n": 333
+  },
+  "conversation_level": {
+    "scam_calls": 200,
+    "benign_calls": 200,
+    "detection_rate": 0.91,
+    "false_alarm_rate": 0.005,
+    "median_turns_to_warning": 2,
+    "per_family_detection": {
+      "digital_arrest": 1.0,
+      "investment_job": 0.818,
+      "kyc_bank": 1.0,
+      "lottery_prize": 1.0,
+      "refund_upi": 1.0,
+      "tech_support": 0.84,
+      "telecom_utility": 0.68
+    }
+  },
+  "scenarios": {
+    "digital_arrest": {
+      "expected": "danger",
+      "final": "danger",
+      "score": 0.975,
+      "pass": true,
+      "first_warning_at_s": 20
+    },
+    "tech_support": {
+      "expected": "danger",
+      "final": "danger",
+      "score": 0.952,
+      "pass": true,
+      "first_warning_at_s": 27
+    },
+    "kyc_otp": {
+      "expected": "warning",
+      "final": "warning",
+      "score": 0.653,
+      "pass": true,
+      "first_warning_at_s": 18
+    },
+    "family_call": {
+      "expected": "safe",
+      "final": "safe",
+      "score": 0.23,
+      "pass": true,
+      "first_warning_at_s": null
+    },
+    "office_it": {
+      "expected": "caution",
+      "final": "caution",
+      "score": 0.522,
+      "pass": true,
+      "first_warning_at_s": null
+    }
+  },
+  "note": "Synthetic evaluation on template families that overlap the training corpus (upper bound). Real-call validation with consented recordings is future work."
+}

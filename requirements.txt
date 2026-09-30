@@ -1,0 +1,15 @@
+# Core (any OS). On Snapdragon Windows-on-Arm use requirements-snapdragon.txt instead of onnxruntime.
+numpy>=1.26.4
+scipy>=1.11
+onnx>=1.16
+onnxruntime>=1.19
+rapidocr-onnxruntime>=1.3.24
+pillow>=10.0
+mss>=9.0
+psutil>=5.9
+tiktoken>=0.7
+soundfile>=0.12
+fastapi>=0.110
+uvicorn>=0.29
+scikit-learn>=1.4   # only for scripts/train_classifier.py
+pytest>=8.0

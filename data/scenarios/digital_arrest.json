@@ -1,0 +1,41 @@
+{
+  "title": "Digital arrest over a WhatsApp video call (Hinglish)",
+  "expected": "danger",
+  "timeline": [
+    {
+      "at": 0,
+      "system": [
+        "WhatsApp.exe",
+        "explorer.exe"
+      ]
+    },
+    {
+      "at": 4,
+      "call": "Hello, main Mumbai police cyber crime branch se Inspector Sharma bol raha hoon."
+    },
+    {
+      "at": 12,
+      "call": "Aapke naam se FedEx parcel mein drugs aur paanch fake passports mile hain."
+    },
+    {
+      "at": 20,
+      "call": "Your Aadhaar card has been used in a money laundering case, an arrest warrant is issued."
+    },
+    {
+      "at": 26,
+      "screen": "warrant"
+    },
+    {
+      "at": 34,
+      "call": "Ye national secret hai, kisi ko mat batana aur call mat kaatna, camera on rakho."
+    },
+    {
+      "at": 45,
+      "call": "Verification ke liye apne account ka paisa RBI safe account mein transfer karo, jaanch ke baad wapas milega."
+    },
+    {
+      "at": 52,
+      "screen": "bank_transfer"
+    }
+  ]
+}

@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sajag AI | On-device scam shield</title>
+<style>
+  :root{--bg:#f6f4f1;--card:#fff;--ink:#1d1d1f;--muted:#6b6b70;--line:#e7e3dd;--red:#d7002a;--amber:#e38a00;--yellow:#c9a400;--green:#1f9d55;--blue:#3253dc}
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 "Segoe UI",system-ui,sans-serif}
+  header{display:flex;align-items:center;gap:14px;padding:14px 22px;background:#111;color:#fff}
+  header .logo{width:34px;height:34px;border-radius:9px;background:var(--red);display:grid;place-items:center;font-weight:800}
+  header h1{font-size:18px;margin:0} header .sub{color:#bbb;font-size:12px}
+  header .npu{margin-left:auto;font-size:12px;padding:6px 10px;border-radius:999px;background:#222;border:1px solid #333}
+  main{display:grid;grid-template-columns:360px 1fr 330px;gap:16px;padding:16px 22px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+  .card h2{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+  .gauge{position:relative;height:170px;display:grid;place-items:center}
+  .gauge svg{width:220px;height:130px}
+  .score{position:absolute;top:70px;text-align:center}
+  .score b{font-size:40px;display:block} .level{font-weight:700;letter-spacing:.08em}
+  .fam{font-size:15px;font-weight:600;margin:6px 0 10px;text-align:center}
+  .reasons li{margin:4px 0} .advice{background:#fff5f5;border-left:4px solid var(--red);padding:10px 12px;border-radius:8px;margin-top:10px}
+  .hi{color:#444;font-size:13px}
+  .timeline{height:560px;overflow:auto;display:flex;flex-direction:column;gap:8px}
+  .ev{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:#fcfbf9}
+  .ev .k{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted)}
+  .ev.call{border-left:4px solid var(--blue)} .ev.screen{border-left:4px solid #8e44ad} .ev.system{border-left:4px solid #555}
+  .ev.alert{border-left:4px solid var(--red);background:#fff4f4}
+  .tag{display:inline-block;font-size:11px;padding:1px 7px;border-radius:999px;background:#f0ece6;margin:2px 4px 0 0}
+  .btn{display:block;width:100%;text-align:left;border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 11px;margin:6px 0;cursor:pointer;font:inherit}
+  .btn:hover{border-color:var(--red)} table{width:100%;border-collapse:collapse;font-size:12px} td{padding:4px 2px;border-bottom:1px solid var(--line)}
+  .pill{font-size:11px;padding:2px 8px;border-radius:999px;color:#fff}
+  .safe{background:var(--green)} .caution{background:var(--yellow)} .warning{background:var(--amber)} .danger{background:var(--red)}
+  .privacy{font-size:12px;color:var(--muted);margin-top:10px}
+  @media (max-width:1100px){main{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">S</div>
+  <div><h1>Sajag AI</h1><div class="sub">On-device scam shield for Snapdragon AI PCs. Nothing leaves this PC.</div></div>
+  <div class="npu" id="npu">detecting NPU...</div>
+</header>
+<main>
+  <section class="card">
+    <h2>Live risk</h2>
+    <div class="gauge">
+      <svg viewBox="0 0 220 130"><path d="M20 115 A90 90 0 0 1 200 115" fill="none" stroke="#eee" stroke-width="18" stroke-linecap="round"/>
+        <path id="arc" d="M20 115 A90 90 0 0 1 200 115" fill="none" stroke="#1f9d55" stroke-width="18" stroke-linecap="round" stroke-dasharray="0 400"/></svg>
+      <div class="score"><b id="score">0%</b><span class="level" id="level">SAFE</span></div>
+    </div>
+    <div class="fam" id="family">No scam pattern detected</div>
+    <ul class="reasons" id="reasons"></ul>
+    <div class="advice" id="advice">Sajag is watching the screen, call audio and system for scam patterns.</div>
+    <div class="advice hi" id="advice_hi" style="border-color:#999;background:#f7f7f7"></div>
+    <div class="privacy">Helpline 1930 | cybercrime.gov.in</div>
+  </section>
+  <section class="card">
+    <h2>What Sajag sees (live)</h2>
+    <div class="timeline" id="timeline"></div>
+  </section>
+  <section>
+    <div class="card">
+      <h2>Try a scenario</h2>
+      <div id="scenarios"></div>
+      <button class="btn" onclick="fetch('/api/reset',{method:'POST'}).then(()=>{tl.innerHTML='';render({score:0,level:'safe',reasons:[],advice:'',advice_hi:''})})">Reset</button>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h2>On-device AI</h2>
+      <table id="sessions"></table>
+      <div class="privacy" id="stats"></div>
+    </div>
+  </section>
+</main>
+<script>
+const colors={safe:'#1f9d55',caution:'#c9a400',warning:'#e38a00',danger:'#d7002a'};
+const tl=document.getElementById('timeline');
+function esc(s){return String(s??'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+function render(st){
+  const pct=Math.round((st.score||0)*100);
+  document.getElementById('score').textContent=pct+'%';
+  document.getElementById('level').textContent=(st.level||'safe').toUpperCase();
+  const arc=document.getElementById('arc'); arc.setAttribute('stroke-dasharray',(283*pct/100)+' 400'); arc.setAttribute('stroke',colors[st.level||'safe']);
+  document.getElementById('family').textContent=st.family_name||'No scam pattern detected';
+  document.getElementById('reasons').innerHTML=(st.reasons||[]).map(r=>'<li>'+esc(r)+'</li>').join('');
+  document.getElementById('advice').textContent=st.advice||'Sajag is watching the screen, call audio and system for scam patterns.';
+  document.getElementById('advice_hi').textContent=st.advice_hi||'';
+}
+function addEvent(ev){
+  let cls=ev.type, html='';
+  if(ev.type==='transcript'){cls='call';const f=ev.finding;html=`<div class="k">Call audio (${esc(ev.speaker)})</div>${esc(f.text)}<div>${(f.evidence||[]).map(e=>'<span class="tag">'+esc(e.tactic)+': '+esc(e.phrase)+'</span>').join('')}</div>`}
+  else if(ev.type==='screen'){const f=ev.finding;html=`<div class="k">Screen (OCR)</div>${esc((f.text||'').slice(0,220))}<div>${(f.evidence||[]).map(e=>'<span class="tag">'+esc(e.tactic)+': '+esc(e.phrase)+'</span>').join('')}</div>`}
+  else if(ev.type==='system'){html=`<div class="k">System</div>Call apps: ${esc((ev.call_apps||[]).join(', ')||'none')} | Remote access: ${esc((ev.remote_access||[]).join(', ')||'none')}`}
+  else if(ev.type==='alert'){const s=ev.state;html=`<div class="k">Alert</div><span class="pill ${s.level}">${s.level.toUpperCase()}</span> ${esc(s.family_name||'')} (${Math.round(s.score*100)}%)`}
+  else return;
+  const d=document.createElement('div'); d.className='ev '+cls; d.innerHTML=html; tl.prepend(d);
+}
+async function refresh(){
+  const r=await fetch('/api/state'); const j=await r.json(); render(j.state);
+  const dev=j.device; document.getElementById('npu').textContent=dev.qnn_npu?'Hexagon NPU active (QNN EP)':'CPU fallback ('+(dev.machine||'')+')';
+  document.getElementById('sessions').innerHTML='<tr><td><b>Model</b></td><td><b>Runs on</b></td><td><b>ms</b></td></tr>'+j.sessions.map(s=>`<tr><td>${esc(s.name)}</td><td>${s.provider.replace('ExecutionProvider','')}${s.power_mode?' / '+s.power_mode:''}</td><td>${s.mean_ms}</td></tr>`).join('');
+  document.getElementById('stats').textContent=`Segments ${j.stats.segments} | screens ${j.stats.screens} | skipped ${j.stats.screens_skipped} | alerts ${j.stats.alerts}`;
+  document.getElementById('scenarios').innerHTML=Object.entries(j.scenarios).map(([k,v])=>`<button class="btn" onclick="tl.innerHTML='';fetch('/api/demo/${k}',{method:'POST'})">${esc(v)}</button>`).join('');
+}
+const ws=new WebSocket((location.protocol==='https:'?'wss://':'ws://')+location.host+'/ws');
+ws.onmessage=m=>{const ev=JSON.parse(m.data); if(ev.type==='risk') render(ev.state); else addEvent(ev);};
+refresh(); setInterval(refresh,4000);
+</script>
+</body>
+</html>

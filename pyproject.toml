@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sajag-ai"
+version = "1.0.0"
+description = "On-device, multimodal scam shield for Snapdragon AI PCs (Hexagon NPU via ONNX Runtime QNN)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "Apache-2.0"}
+authors = [{name = "Tanmay Sahare"}]
+dependencies = ["numpy", "scipy", "onnx", "onnxruntime", "rapidocr-onnxruntime", "pillow", "mss", "psutil",
+                "tiktoken", "soundfile", "fastapi", "uvicorn"]
+
+[project.scripts]
+sajag = "sajag.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["sajag*"]
+
+[tool.setuptools.package-data]
+sajag = ["assets/*", "ui/static/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

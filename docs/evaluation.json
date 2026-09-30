@@ -1,0 +1,40 @@
+{
+  "corpus_rows": 2604,
+  "labels": [
+    "benign",
+    "digital_arrest",
+    "investment_job",
+    "kyc_bank",
+    "lottery_prize",
+    "refund_upi",
+    "tech_support",
+    "telecom_utility"
+  ],
+  "random_split": {
+    "test_rows": 521,
+    "macro_f1": 1.0,
+    "scam_vs_benign": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    }
+  },
+  "template_holdout": {
+    "test_rows": 150,
+    "macro_f1": 0.31,
+    "scam_vs_benign": {
+      "precision": 1.0,
+      "recall": 0.4048,
+      "f1": 0.5763
+    }
+  },
+  "model": {
+    "path": "sajag/assets/intent_classifier.onnx",
+    "input": [
+      1,
+      16384
+    ],
+    "bytes": 524520
+  },
+  "note": "Synthetic corpus. Template-holdout is the honest generalisation estimate; real-call validation is future work."
+}
