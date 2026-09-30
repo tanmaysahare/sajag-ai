@@ -65,13 +65,15 @@ flowchart LR
   E --> U[Full-screen alert, voice, toast, local dashboard]
 ```
 
+Pitch deck: [docs/submission/Sajag_AI_Pitch.pdf](docs/submission/Sajag_AI_Pitch.pdf) · Project description: [docs/submission/Sajag_AI_Brief_Project_Description.pdf](docs/submission/Sajag_AI_Brief_Project_Description.pdf) · References: [docs/REFERENCES.md](docs/REFERENCES.md)
+
 Details: [docs/architecture.md](docs/architecture.md) · NPU techniques: [docs/npu-optimization.md](docs/npu-optimization.md) · Privacy: [docs/privacy.md](docs/privacy.md)
 
 ## Models
 
 | Role | Model | Source | Precision / runtime | Published latency, Snapdragon X Elite CRD (AI Hub) |
 |---|---|---|---|---|
-| Voice activity | Silero-VAD | Qualcomm AI Hub `silero_vad` | w8a16 mixed, ONNX + QNN | 0.068 ms / chunk, 55/55 layers on NPU |
+| Voice activity | Silero-VAD | Qualcomm AI Hub `silero_vad` | w8a16 mixed, ONNX + QNN | 0.068 ms / chunk, 51/51 layers on NPU |
 | Speech to text | Whisper-Small (multilingual) | Qualcomm AI Hub `whisper_small` | float, precompiled QNN ONNX | encoder 117.1 ms, decoder 10.5 ms/token, 100% NPU |
 | Speech to text (X2) | Whisper-Large-v3-Turbo | Qualcomm AI Hub | float, precompiled QNN ONNX | encoder 251 ms, decoder 4.9 ms/token on X2 Elite |
 | Screen text | PP-OCRv4 det + rec | PaddleOCR via RapidOCR (open source) | static-shape fp32 graph, fp16 on HTP (QDQ w8a16 optional) | measured with `python -m sajag bench` |
