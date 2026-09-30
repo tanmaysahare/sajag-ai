@@ -33,6 +33,10 @@
   .safe{background:var(--green)} .caution{background:var(--yellow)} .warning{background:var(--amber)} .danger{background:var(--red)}
   .privacy{font-size:12px;color:var(--muted);margin-top:10px}
   @media (max-width:1100px){main{grid-template-columns:1fr}}
+  #modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9;align-items:center;justify-content:center}
+  #modal .box{background:#fff;border-radius:14px;max-width:900px;width:92%;max-height:86vh;display:flex;flex-direction:column;padding:16px}
+  #modal pre{white-space:pre-wrap;font:12.5px/1.45 Consolas,monospace;overflow:auto;background:#faf7f2;border:1px solid var(--line);border-radius:10px;padding:12px;flex:1}
+  #modal .row{display:flex;gap:8px;margin-top:10px}#modal .row .btn{width:auto;display:inline-block}
 </style>
 </head>
 <body>
@@ -63,6 +67,7 @@
     <div class="card">
       <h2>Try a scenario</h2>
       <div id="scenarios"></div>
+      <button class="btn" style="background:#d7002a;color:#fff;border-color:#d7002a;font-weight:600" onclick="openReport()">Prepare 1930 report (golden hour)</button>
       <button class="btn" onclick="fetch('/api/reset',{method:'POST'}).then(()=>{tl.innerHTML='';render({score:0,level:'safe',reasons:[],advice:'',advice_hi:''})})">Reset</button>
     </div>
     <div class="card" style="margin-top:16px">
@@ -72,7 +77,11 @@
     </div>
   </section>
 </main>
+<div id="modal"><div class="box"><h2 style="margin:0 0 8px;font-size:16px">1930 incident summary (prepared on this PC, nothing uploaded)</h2><pre id="reportText"></pre>
+<div class="row"><button class="btn" onclick="navigator.clipboard.writeText(document.getElementById('reportText').textContent)">Copy</button><button class="btn" onclick="dl()">Save as .txt</button><button class="btn" onclick="document.getElementById('modal').style.display='none'">Close</button></div></div></div>
 <script>
+async function openReport(){const r=await fetch('/api/report');const j=await r.json();document.getElementById('reportText').textContent=j.text;document.getElementById('modal').style.display='flex';}
+function dl(){const b=new Blob([document.getElementById('reportText').textContent],{type:'text/plain'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='sajag_1930_report.txt';a.click();}
 const colors={safe:'#1f9d55',caution:'#c9a400',warning:'#e38a00',danger:'#d7002a'};
 const tl=document.getElementById('timeline');
 function esc(s){return String(s??'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}

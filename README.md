@@ -2,6 +2,8 @@
 
 # Sajag AI (सजग)
 
+[![tests](https://github.com/tanmaysahare/sajag-ai/actions/workflows/tests.yml/badge.svg)](https://github.com/tanmaysahare/sajag-ai/actions/workflows/tests.yml)
+
 ### An on-device, multimodal scam shield for Snapdragon AI PCs
 
 **Sees the scam on your screen. Hears it on your call. Stops it before money moves. Nothing leaves your PC.**
@@ -35,9 +37,11 @@ The government's own data shows awareness works: digital-arrest losses fell 66% 
 | **Fusion** | The whole conversation, across modalities | Decaying tactic memory, cross-modal escalation rules (remote access + OTP, secrecy + authority + money), 7 scam families | CPU |
 | **Explainer** | The verdict | Bilingual templates, optional **Llama-3.2-3B-Instruct** (AI Hub, Genie SDK) rephrasing | Hexagon NPU |
 
+**Golden-hour 1930 report.** Money can often be frozen if a fraud is reported within the first hours, but victims under stress cannot recall what the caller claimed or which account they paid. One click on *Prepare 1930 report* turns the last 15 minutes of in-memory evidence into a ready-to-read complaint: claimed identities, phone numbers, UPI IDs, account numbers, IFSC codes, amounts, links, remote-access apps and a timeline, with next steps in English and Hindi. It is built only on request and never uploaded.
+
 When risk rises to **WARNING** or **DANGER**, Sajag interrupts with a full-screen bilingual card, a spoken warning, a Windows toast, the specific reasons ("asked you to stay on the call and not tell anyone", "AnyDesk started during a call") and the national helpline **1930**.
 
-<p align="center"><img src="docs/img/dashboard_digital_arrest.png" width="920" alt="Sajag dashboard during a simulated digital-arrest call"></p>
+<p align="center"><img src="docs/img/demo.gif" width="920" alt="Sajag replaying a simulated digital-arrest call and preparing a 1930 report"></p>
 
 ## Why it has to run on the Snapdragon NPU
 
@@ -92,9 +96,11 @@ python scripts/evaluate.py      # writes docs/evaluation_pipeline.json
 | Digital-arrest scenario | WARNING at t = 20 s, DANGER at 26 s, **before** the money-transfer request at 45 s |
 | 400 synthetic calls (200 scam, 200 benign incl. hard negatives) | **91% detected, 0.5% false alarms**, median **2 turns** to first WARNING |
 | Per family | digital arrest 100%, KYC 100%, UPI refund 100%, lottery 100%, tech support 84%, investment 82%, SIM/electricity 68% |
+| Full pipeline on scam scripts the classifier never saw (25% of templates withheld) | **54% detected, 0.5% false alarms**, median 2 turns |
 | Intent classifier alone, template-held-out | precision 1.00, recall 0.40 (why the pattern engine and fusion exist) |
+| Golden-hour report | extracts UPI IDs, phones, accounts, IFSC, amounts, links and remote apps from call + screen (tested) |
 
-These numbers come from a synthetic corpus whose templates overlap the training data, so they are an upper bound. Validation on consented real-call recordings is the first item on the roadmap.
+The 91% figure uses templates that overlap the training data, so it is an upper bound; the 54% held-out figure is the honest lower estimate for brand-new scripts. Validation on consented real-call recordings is the first item on the roadmap.
 
 ## Quick start
 
@@ -114,12 +120,13 @@ pip install -r requirements.txt
 python -m sajag demo                  # replays 5 scam / benign scenarios through the full pipeline
 python -m sajag ui                    # dashboard with one-click scenarios
 python -m sajag scan-text "Aapka KYC expire ho gaya hai, OTP bata do"
-python -m pytest -q                   # 27 tests
+python -m pytest -q                   # 29 tests
 ```
 
 | Command | Purpose |
 |---|---|
 | `python -m sajag run` | Live screen + call + system guardian with dashboard |
+| `python -m sajag demo [name] --report` | Replay and print the golden-hour 1930 incident summary |
 | `python -m sajag demo [name]` | Console replay of `digital_arrest`, `tech_support`, `kyc_otp`, `family_call`, `office_it` |
 | `python -m sajag bench --out bench.json` | Latency of every model on NPU vs CPU |
 | `python -m sajag fetch-models --chipset x_elite` | One-time download of AI Hub assets (Silero-VAD, Whisper-Small) |
@@ -134,11 +141,12 @@ sajag/
   audio/              WASAPI capture, Silero-VAD, NumPy log-mel, tiktoken tokenizer, AI Hub Whisper decode loop
   vision/             screen watcher (dHash gate), NPU OCR with static-shape adapter
   signals/            remote-access / call-app / payment-screen detection
+  report.py           golden-hour 1930 incident summary (entity extraction + timeline)
   risk/               multilingual scam knowledge base, analyzer, classifier, temporal fusion, explainer
   alerts/             full-screen interrupt, voice, toast
   ui/                 FastAPI + WebSocket dashboard (127.0.0.1 only, no external assets)
 scripts/              corpus builder, classifier training, OCR NPU preparation, evaluation
-tests/                27 unit + end-to-end tests
+tests/                29 unit + end-to-end tests
 docs/                 architecture, NPU optimisation, privacy, evaluation, references
 ```
 

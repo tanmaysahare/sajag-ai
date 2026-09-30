@@ -22,11 +22,28 @@
       "telecom_utility": 0.68
     }
   },
+  "heldout_pipeline": {
+    "held_out_templates": {
+      "digital_arrest": 4,
+      "tech_support": 2,
+      "kyc_bank": 2,
+      "refund_upi": 2,
+      "telecom_utility": 2,
+      "investment_job": 2,
+      "lottery_prize": 2,
+      "benign": 11
+    },
+    "scam_calls": 200,
+    "benign_calls": 200,
+    "detection_rate": 0.54,
+    "false_alarm_rate": 0.005,
+    "median_turns_to_warning": 2
+  },
   "scenarios": {
     "digital_arrest": {
       "expected": "danger",
       "final": "danger",
-      "score": 0.975,
+      "score": 0.983,
       "pass": true,
       "first_warning_at_s": 20
     },

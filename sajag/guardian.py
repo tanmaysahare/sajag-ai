@@ -28,7 +28,7 @@ class GuardianConfig:
     whisper_dir: str | None = None
     vad_model: str | None = None
     alerts: bool = True
-    store_transcripts: bool = False  # privacy: nothing is persisted unless the user opts in
+    keep_minutes: int = 15  # evidence kept in RAM only, for fusion and the optional 1930 report
     extra: dict = field(default_factory=dict)
 
 
@@ -53,8 +53,8 @@ class Guardian:
     def subscribe(self, fn: Callable[[dict], None]) -> None:
         self.subscribers.append(fn)
 
-    def _emit(self, kind: str, data: dict) -> None:
-        ev = {"type": kind, "t": time.time(), **data}
+    def _emit(self, kind: str, data: dict, t: float | None = None) -> None:
+        ev = {"type": kind, "t": time.time() if t is None else t, **data}
         self.events.append(ev)
         for fn in list(self.subscribers):
             try:
@@ -65,11 +65,11 @@ class Guardian:
     def _update(self, now: float | None = None) -> RiskState:
         st = self.fusion.evaluate(now)
         self.state = st
-        self._emit("risk", {"state": st.as_dict()})
+        self._emit("risk", {"state": st.as_dict()}, t=st.t)
         if self.fusion.escalated(st) and st.level != "safe":
             self.stats["alerts"] += 1
             record = self.notifier.notify(st) if (self.notifier and self.config.alerts) else None
-            self._emit("alert", {"state": st.as_dict(), "record": record})
+            self._emit("alert", {"state": st.as_dict(), "record": record}, t=st.t)
         return st
 
     # ------------------------------------------------------------------ inputs
@@ -79,8 +79,8 @@ class Guardian:
             f = self.analyzer.analyze(text, source="call", timestamp=t)
             self.fusion.add_finding(f)
             self.stats["segments"] += 1
-            self._emit("transcript", {"speaker": speaker, "finding": f.as_dict() if self.config.store_transcripts
-                                      else {**f.as_dict(), "text": text}})
+            # Events live in a RAM ring buffer only; nothing is written to disk.
+            self._emit("transcript", {"speaker": speaker, "finding": f.as_dict()}, t=t)
             return self._update(t)
 
     def ingest_screen_text(self, text: str, t: float | None = None) -> RiskState:
@@ -91,7 +91,7 @@ class Guardian:
             if is_payment_screen(text):
                 self.fusion.set_context(payment_screen=True, t=t)
             self.stats["screens"] += 1
-            self._emit("screen", {"finding": f.as_dict()})
+            self._emit("screen", {"finding": f.as_dict()}, t=t)
             return self._update(t)
 
     def ingest_screen_image(self, image, t: float | None = None) -> RiskState:
@@ -107,7 +107,7 @@ class Guardian:
             t = t or time.time()
             self.fusion.set_context(call_active=snap.call_active, call_app=", ".join(snap.call_apps) or None,
                                     remote_access=snap.remote_access, t=t)
-            self._emit("system", {"remote_access": snap.remote_access, "call_apps": snap.call_apps})
+            self._emit("system", {"remote_access": snap.remote_access, "call_apps": snap.call_apps}, t=t)
             return self._update(t)
 
     # ------------------------------------------------------------------ live loops
@@ -173,6 +173,13 @@ class Guardian:
 
     def stop(self) -> None:
         self._stop.set()
+
+    def report(self) -> dict:
+        """Golden-hour 1930 incident summary built from in-memory evidence (see report.py)."""
+        from .report import build_report
+
+        with self._lock:
+            return build_report(list(self.events), self.state.as_dict())
 
     def reset(self) -> None:
         with self._lock:

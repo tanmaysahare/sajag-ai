@@ -142,3 +142,26 @@ def test_whisper_decode_loop_with_fake_sessions(tmp_path):
     obj.dec_outputs = [s.name for s in obj.decoder.get_outputs()]
     tr = obj.transcribe(np.zeros(16000, np.float32))
     assert tr.text == "1000 1000" and tr.tokens == 3
+
+
+def test_entity_extraction():
+    from sajag.report import extract_entities
+
+    e = extract_entities("Pay to winsupport.desk@ybl or a/c 50100234567891 IFSC HDFC0001234, call 98765 43210, "
+                         "Rs 4,999 now, mail me at a.b@gmail.com, visit refund-help.xyz")
+    assert e.upi_ids == {"winsupport.desk@ybl"}
+    assert "50100234567891" in e.accounts and "HDFC0001234" in e.ifsc
+    assert "+91 9876543210" in e.phones
+    assert any("4,999" in a for a in e.amounts)
+    assert "refund-help.xyz" in e.links
+
+
+def test_golden_hour_report(guardian):
+    run_scenario("tech_support", guardian, use_ocr=False)
+    r = guardian.report()
+    assert r["risk_level"] == "danger"
+    assert "AnyDesk" in r["entities"]["remote_apps"]
+    assert "winsupport.desk@ybl" in r["entities"]["upi_ids"]
+    assert "1930" in r["text"] and len(r["timeline"]) >= 4
+    ts = [row["t"] for row in r["timeline"]]
+    assert ts == sorted(ts)

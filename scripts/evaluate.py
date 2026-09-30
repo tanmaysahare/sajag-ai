@@ -97,6 +97,75 @@ def conversation_eval(an: TextRiskAnalyzer, rng: random.Random, n: int = 400) ->
     }
 
 
+def heldout_pipeline_eval(n: int = 400, seed: int = 99) -> dict:
+    """Full pipeline on templates the classifier never saw (the honest generalisation test).
+
+    25% of templates per class are withheld; the intent classifier is retrained on
+    the rest; conversations are then built only from the withheld templates.
+    """
+    import tempfile
+
+    import numpy as np
+    from sklearn.linear_model import LogisticRegression
+
+    from sajag.npu import SessionFactory
+    from sajag.risk.classifier import IntentClassifier
+    from train_classifier import export_onnx, matrix
+
+    rng = random.Random(seed)
+    labels = ["benign"] + sorted(SCAM)
+    train_rows, held = [], {}
+    for fam, temps in list(SCAM.items()) + [("benign", BENIGN)]:
+        temps = list(temps)
+        rng.shuffle(temps)
+        k = max(2, len(temps) // 4)
+        held[fam], kept = temps[:k], temps[k:]
+        for tpl in kept:
+            for _ in range(12 if fam != "benign" else 24):
+                train_rows.append((augment(fill(tpl, rng), rng), fam))
+    clf = LogisticRegression(C=8.0, max_iter=2000)
+    clf.fit(matrix([t for t, _ in train_rows]), np.array([labels.index(l) for _, l in train_rows]))
+    tmp = Path(tempfile.mkdtemp())
+    export_onnx(clf, labels, tmp / "clf.onnx")
+    (tmp / "labels.json").write_text(json.dumps(labels), encoding="utf-8")
+    an = TextRiskAnalyzer(use_classifier=False)
+    an.classifier = IntentClassifier(factory=SessionFactory(prefer_npu=False), model_path=tmp / "clf.onnx",
+                                     labels_path=tmp / "labels.json")
+    small_talk = [b for b in held["benign"] if "otp" not in b.lower()] or held["benign"]
+    det = fa = n_s = n_b = 0
+    turns = []
+    for i in range(n):
+        fusion, t = RiskFusion(), 1000.0
+        if i % 2 == 0:
+            fam = rng.choice(sorted(SCAM))
+            convo = []
+            for _ in range(rng.randint(3, 6)):
+                if rng.random() < 0.4:
+                    convo.append(fill(rng.choice(small_talk), rng))
+                convo.append(augment(fill(rng.choice(held[fam]), rng), rng))
+        else:
+            fam = "benign"
+            convo = [augment(fill(rng.choice(held["benign"]), rng), rng) for _ in range(rng.randint(4, 8))]
+        first = None
+        for k, text in enumerate(convo, 1):
+            t += rng.uniform(5, 15)
+            fusion.add_finding(an.analyze(text, source="call", timestamp=t))
+            if first is None and LEVEL_ORDER[fusion.evaluate(t).level] >= 2:
+                first = k
+        if fam == "benign":
+            n_b += 1
+            fa += first is not None
+        else:
+            n_s += 1
+            det += first is not None
+            if first:
+                turns.append(first)
+    turns.sort()
+    return {"held_out_templates": {k: len(v) for k, v in held.items()}, "scam_calls": n_s, "benign_calls": n_b,
+            "detection_rate": round(det / n_s, 4), "false_alarm_rate": round(fa / n_b, 4),
+            "median_turns_to_warning": turns[len(turns) // 2] if turns else None}
+
+
 def scenario_eval() -> dict:
     from sajag.demo import SCENARIOS, run_scenario
 
@@ -116,6 +185,7 @@ def main() -> None:
     res = {
         "segment_level": segment_eval(an, rng),
         "conversation_level": conversation_eval(an, rng),
+        "heldout_pipeline": heldout_pipeline_eval(),
         "scenarios": scenario_eval(),
         "note": "Synthetic evaluation on template families that overlap the training corpus (upper bound). Real-call validation with consented recordings is future work.",
     }

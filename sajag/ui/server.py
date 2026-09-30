@@ -61,6 +61,10 @@ def create_app(guardian) -> FastAPI:
         threading.Thread(target=run_scenario, args=(name, guardian), kwargs={"realtime": True}, daemon=True).start()
         return JSONResponse({"started": name})
 
+    @app.get("/api/report")
+    def report() -> JSONResponse:
+        return JSONResponse(guardian.report())
+
     @app.post("/api/reset")
     def reset() -> JSONResponse:
         guardian.reset()

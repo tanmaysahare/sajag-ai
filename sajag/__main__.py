@@ -46,6 +46,9 @@ def cmd_demo(args) -> None:
         for r in st.reasons[:4]:
             print("    because:", r)
         print("    advice :", st.advice)
+        if args.report and st.level in ("warning", "danger"):
+            print()
+            print(g.report()["text"])
 
 
 def cmd_scan_text(args) -> None:
@@ -121,6 +124,7 @@ def main(argv=None) -> None:
     s.set_defaults(fn=cmd_run)
     s = sub.add_parser("ui"); s.add_argument("--port", type=int, default=8765); s.set_defaults(fn=cmd_ui)
     s = sub.add_parser("demo"); s.add_argument("name", nargs="?"); s.add_argument("--no-ocr", action="store_true")
+    s.add_argument("--report", action="store_true", help="print the golden-hour 1930 incident summary")
     s.set_defaults(fn=cmd_demo)
     s = sub.add_parser("scan-text"); s.add_argument("text"); s.set_defaults(fn=cmd_scan_text)
     s = sub.add_parser("scan-image"); s.add_argument("path"); s.set_defaults(fn=cmd_scan_image)

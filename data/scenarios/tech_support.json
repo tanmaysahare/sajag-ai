@@ -41,6 +41,10 @@
       "call": "Now open your net banking so I can process the refund of the service charge."
     },
     {
+      "at": 47,
+      "call": "Or simply pay the 4,999 rupees service charge to winsupport.desk@ybl and I will refund it."
+    },
+    {
       "at": 50,
       "screen": "bank_transfer"
     }

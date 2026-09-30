@@ -34,6 +34,10 @@
       "call": "Verification ke liye apne account ka paisa RBI safe account mein transfer karo, jaanch ke baad wapas milega."
     },
     {
+      "at": 49,
+      "call": "Account number 50100234567891, IFSC HDFC0001234, abhi 9 lakh 80 thousand bhejo. Mera number 98765 43210 hai."
+    },
+    {
       "at": 52,
       "screen": "bank_transfer"
     }
